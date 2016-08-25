@@ -87,6 +87,8 @@ class MainSignUpHandler(webapp2.RequestHandler):
             email_error = "Invalid email address!"
         if password and password2 and password != password2:
             password_error = "Passwords don't match."
+        if not password:
+            password_error = "Password required."
 
         if username_error or password_error or email_error:
             self.write_form(username, email, username_error, password_error, email_error)
