@@ -91,11 +91,12 @@ class MainSignUpHandler(webapp2.RequestHandler):
         if username_error or password_error or email_error:
             self.write_form(username, email, username_error, password_error, email_error)
         else:
-            self.redirect('/welcome')
+            self.redirect('/welcome?username=' + username)
 
 class Welcome(webapp2.RequestHandler):
     def get(self):
-        self.response.write('Hello!')
+        username = self.request.get('username')
+        self.response.write('Hello ' + username + "!")
 
 app = webapp2.WSGIApplication([
     ('/', MainSignUpHandler),
