@@ -56,11 +56,12 @@ def valid_email(email):
         return False
 
 class MainSignUpHandler(webapp2.RequestHandler):
-    def write_form(self, username = "", email = "", username_error = "", password_error = "", email_error = ""):
+    def write_form(self, username = "", email = "", username_error = "", password_error = "", password2_error = "", email_error = ""):
         self.response.out.write(form % {"username": username,
                                         "email": email,
                                         "username_error": username_error,
                                         "password_error": password_error,
+                                        "password2_error": password2_error,
                                         "email_error": email_error})
 
     def get(self):
@@ -79,19 +80,22 @@ class MainSignUpHandler(webapp2.RequestHandler):
 
         username_error = ""
         password_error = ""
+        password2_error = None
         email_error = ""
 
         if not username or not valid_name(username):
             username_error = "Invalid username."
         if email and not valid_email(email):
             email_error = "Invalid email address!"
-        if password and password2 and password != password2:
+        if password != password2:
             password_error = "Passwords don't match."
         if not password:
             password_error = "Password required."
+        if not password2:
+            password2_error = "Password verification required."
 
-        if username_error or password_error or email_error:
-            self.write_form(username, email, username_error, password_error, email_error)
+        if username_error or password_error or password2_error or email_error:
+            self.write_form(username, email, username_error, password_error, password2_error, email_error)
         else:
             self.redirect('/welcome?username=' + username)
 
