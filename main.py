@@ -1,6 +1,7 @@
 
 import webapp2
 import cgi
+import re
 
 form = """
 <!DOCTYPE html>
@@ -24,7 +25,7 @@ form = """
   <br>
       <label><b>Verify Password:</b>
         <input type="password" name="password2"
-                           style="height: 20px; width: 200px">&nbsp;<div></div>
+                           style="height: 20px; width: 200px">&nbsp;<div style="color: red">%(password2_error)s</div>
       </label>
   <br>
       <label><b>Email (Optional):</b>
@@ -43,17 +44,17 @@ form = """
 def escape_html(s):
     return cgi.escape(s, quote = True)
 
+USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_name(name):
-    if  not " " in name:
-        return True
-    else:
-        return False
+    return name and USER_RE.match(name)
 
+EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 def valid_email(email):
-    if "@" in email and "." in email:
-        return True
-    else:
-        return False
+    return not email or EMAIL_RE.match(email)
+
+PASS_RE = re.compile(r"^.{3,20}$")
+def valid_password(password):
+    return password and PASS_RE.match(password)
 
 class MainSignUpHandler(webapp2.RequestHandler):
     def write_form(self, username = "", email = "", username_error = "", password_error = "", password2_error = "", email_error = ""):
@@ -80,19 +81,23 @@ class MainSignUpHandler(webapp2.RequestHandler):
 
         username_error = ""
         password_error = ""
-        password2_error = None
+        password2_error = ""
         email_error = ""
 
         if not username or not valid_name(username):
             username_error = "Invalid username."
         if email and not valid_email(email):
             email_error = "Invalid email address!"
-        if password != password2:
-            password_error = "Passwords don't match."
         if not password:
             password_error = "Password required."
         if not password2:
             password2_error = "Password verification required."
+        if not valid_password(password):
+            password_error = "Password is not valid"
+        if not valid_password(password2):
+            password2_error = "Password is not valid."
+        if password != password2:
+            password_error = "Passwords don't match."
 
         if username_error or password_error or password2_error or email_error:
             self.write_form(username, email, username_error, password_error, password2_error, email_error)
